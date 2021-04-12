@@ -36,6 +36,14 @@ class Compilador {
         $this->tokens = explode("\n", $this->tokens);
         foreach ($this->tokens as $k => $v) $this->tokens[$k] = trim($v);
         $this->tokens = array_filter($this->tokens);
+        foreach ($this->tokens as $k => $v) {
+
+            echo "<pre>";
+            echo "{$k} => ";
+            print_r (strpos($v, '"'));
+            echo "</pre>";
+
+        }
         return $this->tokens;
     }
 
@@ -53,7 +61,7 @@ class Compilador {
 
     public function compilar()
     {
-        return $this->createTableSerial();
+        return $this->createTokens();
     }
 
 }
