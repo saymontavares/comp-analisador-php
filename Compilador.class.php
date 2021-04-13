@@ -123,7 +123,7 @@ class Compilador {
                 }
 
                 if (!empty($exp)) {
-                    trigger_error("Um erro de sintaxe foi encontrado", E_USER_ERROR);
+                    trigger_error("Um erro lexico foi encontrado: {$exp[$k]}", E_USER_ERROR);
                 }
             }
         }
