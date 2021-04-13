@@ -8,7 +8,7 @@ class Compilador {
 
     private $code;
     private $tokens;
-    private $tableSerial;
+    private $tableSerial = [];
     private $reservedWords = [
         1   => 'programa',
         2   => '{',
@@ -22,6 +22,7 @@ class Compilador {
         10  => '/',
         11  => '%',
         12  => 'escreva'
+        // 13 => string
     ];
 
     public function __construct($code)
@@ -37,14 +38,21 @@ class Compilador {
         foreach ($this->tokens as $k => $v) $this->tokens[$k] = trim($v);
         $this->tokens = array_filter($this->tokens);
         foreach ($this->tokens as $k => $v) {
-
-            echo "<pre>";
-            echo "{$k} => ";
-            print_r (strpos($v, '"'));
-            echo "</pre>";
-
+            if (strpos($v, '"') && strripos($v, '"')) {
+                if (strripos($v, '"') <= strpos($v, '"') || substr_count($v, '"') % 2 != 0) {
+                    trigger_error("Erro na string ('\"')", E_USER_ERROR);
+                } elseif (strripos($v, '"') > strpos($v, '"')) {
+                    array_push($this->tableSerial, [
+                        13 => substr($v, (strpos($v, '"')+1), (strripos($v, '"')-9))
+                        ]);
+                        substr_replace($v, '', 0, 10);
+                }
+            } else {
+                echo array_search($v, $this->reservedWords);
+            }
         }
-        return $this->tokens;
+        print_r($this->tokens);
+        return $this->tableSerial;
     }
 
     public function createTableSerial()
