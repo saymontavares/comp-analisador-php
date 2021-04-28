@@ -65,6 +65,8 @@ class Compilador {
                         array_push($this->tableSerial, [
                             $search => $tokens[$k]
                         ]);
+                    } else {
+                        trigger_error("Erro na string: {$tokens[$k]}", E_USER_ERROR);
                     }
                 }
             } else {
@@ -91,16 +93,36 @@ class Compilador {
                             } else {
                                 $var = substr($v, strpos($v, '(')+1, strripos($v, ')')-5);
                                 $exp[$k] = substr_replace($v, '', strpos($v, '('), strripos($v, ')'));
-                                array_push($this->tableSerial, [
-                                    16 => $var
-                                ]);
+                                if (isset($exp[$k]) && !preg_match('/[\'^£$%&*()}{@#~?><>,|=+¬-]/', $var)) {
+                                    array_push($this->tableSerial, [
+                                        16 => $var
+                                    ]);
+                                }
                                 $search = array_search($exp[$k], $this->reservedWords);
                                 if ($search !== false) {
                                     array_push($this->tableSerial, [
                                         $search => $exp[$k]
                                     ]);
                                     unset($exp[$k]);
+                                } else {
+                                    trigger_error("Um erro lexico foi encontrado: {$exp[$k]}", E_USER_ERROR);
                                 }
+                            }
+                        } else {
+                            $exp[$k] = str_replace(',', '', $exp[$k]);
+                            if (!preg_match('/[\'^£$%&*()}{@#~?><>,|=+¬-]/', $exp[$k])) {
+                                if (is_numeric($exp[$k])) {
+                                    array_push($this->tableSerial, [
+                                        20 => $exp[$k]
+                                    ]);
+                                } else {
+                                    array_push($this->tableSerial, [
+                                        16 => $exp[$k]
+                                    ]);
+                                }
+                                unset($exp[$k]);
+                            } else {
+                                trigger_error("Um erro lexico foi encontrado: {$exp[$k]}", E_USER_ERROR);
                             }
                         }
                     }
@@ -114,7 +136,7 @@ class Compilador {
                         ]);
                         unset($exp[$k]);
                     }
-                    if (isset($exp[$k]) && !preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $v)) {
+                    if (isset($exp[$k]) && !preg_match('/[\'^£$%&*()}{@#~?><>,|=+¬-]/', $v)) {
                         array_push($this->tableSerial, [
                             16 => $exp[$k]
                         ]);
@@ -134,6 +156,27 @@ class Compilador {
     public function compilar()
     {
         return $this->createTableSerial();
+    }
+
+    public function tokensArr()
+    {
+        $serial = $this->createTableSerial();
+        $reserv = $this->reservedWords;
+        $reserv[13] = 'String';
+        $reserv[16] = 'Var';
+        $reserv[20] = 'Number';
+        $tableTokens = [];
+        foreach ($serial as $a) {
+            foreach ($a as $k => $b) {
+                $tableTokens[] = [
+                    'code' => array_search($b, $a),
+                    'value' => $b,
+                    'tipo' => $reserv[array_search($b, $a)]
+                ];
+            }
+        }
+
+        return $tableTokens;
     }
 
 }

@@ -40,7 +40,7 @@ $code = 'programa
                 escreva("\nA subtração dos números é igual a: ", sub)
                 escreva("\nA multiplicação dos números é igual a: ", mult)
                 escreva("\nA divisão dos números é igual a: ", div)
-            }
+
         }';
 
 $code = 'programa
@@ -49,8 +49,8 @@ $code = 'programa
             {
                 real resultado
 
-                resultado = 5.0 + 4.0 * 2.0
-                escreva("Operação: 5 + 4 * 2 = ", resultado)
+                resultado = 5.0 + 4.0 * 2.0 + 2
+                escreva("Operação: 5 + 4 * 2 + 2 = ", resultado)
 
                 resultado = 5.0 + 4.0 * 2.0
                 escreva("\nOperação: (5 + 4) * 2 = ", resultado)
@@ -63,6 +63,53 @@ $code = 'programa
             }
         }';
 $compilador = new Compilador($code);
-echo "<pre>";
-print_r ($compilador->compilar());
-echo "</pre>";
+$tokens = $compilador->tokensArr();
+?>
+
+<!-- Código -->
+<pre><?= $code ?></pre>
+
+<!-- Tabela de Tokens -->
+<table>
+    <tr>
+        <th>Token</th>
+        <th>Valor</th>
+        <th>Tipo</th>
+    </tr>
+    <?php foreach($tokens as $token): ?>
+        <tr>
+            <td><?= $token['code'] ?></td>
+            <td><?= $token['value'] ?></td>
+            <td><?= $token['tipo'] ?></td>
+        </tr>
+    <?php endforeach ?>
+</table>
+
+<style>
+    table {
+        font-family: arial, sans-serif;
+        border-collapse: collapse;
+        width: 45%;
+        float:right;
+        margin:10px;
+    }
+
+    td, th {
+        border: 1px solid #dddddd;
+        text-align: left;
+        padding: 8px;
+    }
+
+    tr:nth-child(even) {
+        background-color: #dddddd;
+    }
+
+    pre {
+        width: 45%;
+        float:left;
+        background-color:
+        black;color:#FFF;
+        margin:10px;
+        padding: 10px;
+    }
+</style>
