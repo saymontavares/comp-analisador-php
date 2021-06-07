@@ -1,8 +1,8 @@
 <?php
 /**
- * Class Analisador Léxico
- * @author Saymon Tavares
- * @author Matheus
+ * Class Compilador
+ * @author Saymon Souza Tavares
+ * @author Mateus Brognoli Silvano
  */
 class Compilador {
 
