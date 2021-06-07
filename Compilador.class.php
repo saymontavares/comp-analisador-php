@@ -32,7 +32,9 @@ class Compilador {
         // 20  => Number
     ];
 
-    // função construtora, recebe apenas um parametro obrigatório o código fonte
+    /**
+     * função construtora, recebe apenas um parametro obrigatório o código fonte
+     */
     public function __construct($code)
     {
         $this->code = $code;
@@ -60,17 +62,22 @@ class Compilador {
                 if (strripos($v, '"') <= strpos($v, '"') || substr_count($v, '"') % 2 != 0) { // verificar se abriru e fechou as aspas da string se não gera um erro
                     trigger_error("Erro na string (\")", E_USER_ERROR);
                 } elseif (strripos($v, '"') > strpos($v, '"')) {
-                    // se a string estiver correta classificamos tudo que tiver dentro de aspas "" como string
-                    // 13 é o código referencia da tabela de palavras reservadas ($palavrasReservadas) para strings
-                    // fazemos o push para dentro da array de tokens como 13 => String
+
+                    /**
+                     * se a string estiver correta classificamos tudo que tiver dentro de aspas "" como string
+                     * 13 é o código referencia da tabela de palavras reservadas ($palavrasReservadas) para strings
+                     * fazemos o push para dentro da array de tokens como 13 => String
+                     */
                     array_push($this->tabelaTokens, [
                         13 => substr($v, (strpos($v, '"')+1), (strripos($v, '"')-9))
                     ]);
                     $tokens[$k] = substr_replace($v, '', strpos($v, '"'), strripos($v, '"')-7); // removemos as aspas que sobraram da string
                     $tokens[$k] = substr_replace($v, '', strpos($v, '('), strripos($v, ')')); // removemos os parênteses que sobraram da linha
 
-                    // pegamos as palavras que sobraram e buscamos na array de palavras reservadas
-                    // se encontrou faz o push para a array de tokens se não um erro léxico é gerado
+                    /**
+                     * pegamos as palavras que sobraram e buscamos na array de palavras reservadas
+                     * se encontrou faz o push para a array de tokens se não um erro léxico é gerado
+                     */
                     $search = array_search($tokens[$k], $this->palavrasReservadas);
                     if ($search !== false) {
                         array_push($this->tabelaTokens, [
@@ -83,8 +90,10 @@ class Compilador {
             } else {
                 // aqui verficamos as linhas que não possuem string
 
-                // na variavel $exp quebramos as linhas em palavras formando um array de palavras
-                // desse modo percorremos palavra por palavra e comparamos com nossa array de palavras reservadas
+                /**
+                 * na variavel $exp quebramos as linhas em palavras formando um array de palavras
+                 * desse modo percorremos palavra por palavra e comparamos com nossa array de palavras reservadas
+                 */
                 $exp = explode(' ', $v);
                 foreach ($exp as $k => $v) {
                     $search = array_search($v, $this->palavrasReservadas);
@@ -96,9 +105,11 @@ class Compilador {
                         ]);
                         unset($exp[$k]);
                     } else {
-                        // aqui verificamos as palavras dentro dos parênteses
-                        // se são palavras reservadas ou variáveis
-                        // também verificamos se não possui nenhum caracteres especial nos nomes de variaveis ou palavras reservadas pois não pode, isso vai gerar um erro léxico
+                        /**
+                         * aqui verificamos as palavras dentro dos parênteses
+                         * se são palavras reservadas ou variáveis
+                         * também verificamos se não possui nenhum caracteres especial nos nomes de variaveis ou palavras reservadas pois não pode, isso vai gerar um erro léxico
+                         */
                         if (strpos($v, '(') !== false && strripos($v, ')') !== false && strpos($v, '(') < strripos($v, ')')) {
                             $strF = substr($v, strpos($v, '('), strripos($v, ')'));
                             if (strpos($v, '(')+1 == strripos($v, ')')) {
@@ -113,8 +124,10 @@ class Compilador {
                             } else {
                                 $var = substr($v, strpos($v, '(')+1, strripos($v, ')')-5);
                                 $exp[$k] = substr_replace($v, '', strpos($v, '('), strripos($v, ')'));
-                                // verifica se o nome da variável é válida e não possui nenhum caracter não permitido para esse tipo
-                                // classifica como 16 => Var da nossa tabela de tokens
+                                /**
+                                 * verifica se o nome da variável é válida e não possui nenhum caracter não permitido para esse tipo
+                                 * classifica como 16 => Var da nossa tabela de tokens
+                                 */
                                 if (isset($exp[$k]) && !preg_match('/[\'^£$%&*()}{@#~?><>,|=+¬-]/', $var)) {
                                     array_push($this->tabelaTokens, [
                                         16 => $var
@@ -181,6 +194,10 @@ class Compilador {
     // -- ANÁLISE SINTÁTICA
     public function analiseSintatica()
     {
+        /**
+         * nessa fase verificamos alguns "padrões" da linguagem/código por exemplo se o código começa com 'programa',
+         * se a função início foi declarada, se as variaveis foram declaradas corretamente...
+         */
         $lex = $this->analiseLexica();
         foreach ($lex as $k => $linha) {
             foreach ($linha as $el) {
