@@ -247,11 +247,11 @@ class Compilador {
     // -- FIM ANALISE SEMÂNTICA
 
     // RETORNA APENAS A ARRAY DE TOKENS PRONTA
-    /*
-     Essa parte poderia estar dentro da ANÁLISE LÉXICA pois esse é a tabela de tokens pronta
-     optamos em separar para facilitar a exibição da tabela no arquivo index, assim conseguimos pegar só a tabela
-     e trabalhar apenas no visual pra ficar mais legal de ver
-    */
+    /**
+     * Essa parte poderia estar dentro da ANÁLISE LÉXICA pois esse é a tabela de tokens pronta
+     * optamos em separar para facilitar a exibição da tabela no arquivo index, assim conseguimos pegar só a tabela
+     * e trabalhar apenas no visual pra ficar mais legal de ver
+     */
     public function tokensArr()
     {
         $serial = $this->compilar();
@@ -283,9 +283,9 @@ class Compilador {
 
 }
 
-/*
- função genérica para gerar os erros ao dev/usuário
-*/
+/**
+ * função genérica para gerar os erros ao dev/usuário
+ */
 function funcaoMostraErros($errno, $errstr, $errfile, $errline) {
     if (!(error_reporting() & $errno)) return false;
 
