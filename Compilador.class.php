@@ -191,6 +191,7 @@ class Compilador {
     }
     // -- FIM ANÁLISE LÉXICA
 
+
     // -- ANÁLISE SINTÁTICA
     public function analiseSintatica()
     {
@@ -218,11 +219,7 @@ class Compilador {
                 }
                 if ($el == "=" && key($lex[$k-1]) != 16) trigger_error("Um erro sintático foi encontrado: sinal de atribuição '=' sem variável", E_USER_ERROR);
                 if ($el == "escreva" && key($lex[$k-1]) != 13) trigger_error("Um erro sintático foi encontrado: escreva deve conter uma string", E_USER_ERROR);
-
-                echo "<pre>";
-                print_r ("{$k} => {$el}");
-                echo "</pre>";
-
+                if ($el == "leia" && key($lex[$k-1]) != 16) trigger_error("Um erro sintático foi encontrado: leia deve conter uma variável", E_USER_ERROR);
             }
         }
 
@@ -232,6 +229,25 @@ class Compilador {
         return $lex;
     }
     // -- FIM ANÁLISE SINTÁTICA
+
+
+    // -- ANALISE SEMÂNTICA
+    public function analiseSemantica()
+    {
+        /**
+         * nessa fase verificamos se os valores das variáveis corresponde com o tipo, se antes do = existe uma variável para receber valor
+         */
+        $lex = $this->analiseSintatica();
+        foreach ($lex as $k => $linha) {
+            foreach ($linha as $el) {
+                if ($el == "=" && key($lex[$k-1]) != 16) trigger_error("Um erro sintático foi encontrado: sinal de atribuição '=' sem variável", E_USER_ERROR);
+                if ($el == "escreva" && key($lex[$k-1]) != 13) trigger_error("Um erro sintático foi encontrado: escreva deve conter uma string", E_USER_ERROR);
+                if ($el == "leia" && key($lex[$k-1]) != 16) trigger_error("Um erro sintático foi encontrado: leia deve conter uma variável", E_USER_ERROR);
+            }
+        }
+        return $lex;
+    }
+    // -- FIM ANALISE SEMÂNTICA
 
     // RETORNA APENAS A ARRAY DE TOKENS PRONTA
     /*
