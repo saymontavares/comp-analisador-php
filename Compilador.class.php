@@ -178,10 +178,25 @@ class Compilador {
     }
     // -- FIM ANÁLISE LÉXICA
 
+    // -- ANÁLISE SINTÁTICA
+    public function analiseSintatica()
+    {
+        $lex = $this->analiseLexica();
+        foreach ($lex as $k => $linha) {
+            foreach ($linha as $el) {
+                if ($k == 0) {
+                    if ($el != 'programa') trigger_error("Um erro sintático foi encontrado: '{$el}' deve começar com 'programa'", E_USER_ERROR);
+                }
+            }
+        }
+        return $lex;
+    }
+    // -- FIM ANÁLISE SINTÁTICA
+
     // INICIA COMPILAÇÃO
     public function compilar()
     {
-        return $this->analiseLexica();
+        return $this->analiseSintatica();
     }
     // FIM COMPILAÇÃO
 
