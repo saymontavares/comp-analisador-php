@@ -23,7 +23,7 @@ $code = 'programa
         {
             funcao inicio()
             {
-                real a, b, soma, sub, mult, div
+                real a, b, c, soma, sub, mult, div
 
                 escreva("Digite o primeiro número: ")
                 leia(a)
@@ -31,10 +31,11 @@ $code = 'programa
                 escreva("Digite o segundo número: ")
                 leia(b)
 
-                soma = a + b
-                sub = a - b
-                mult = a * b
-                div = a / b
+                soma = a + b + 1
+                sub = a - b + 2
+                mult = a * b + 3
+                div = a / b + 4
+                c = 5 + 1.1
 
                 escreva("\nA soma dos números é igual a: ", soma)
                 escreva("\nA subtração dos números é igual a: ", sub)
