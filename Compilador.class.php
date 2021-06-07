@@ -197,7 +197,7 @@ class Compilador {
     {
         /**
          * nessa fase verificamos alguns "padrões" da linguagem/código por exemplo se o código começa com 'programa',
-         * se a função início foi declarada, se as variaveis foram declaradas corretamente...
+         * se a função início foi declarada, se as variaveis foram declaradas corretamente, se inicio e finalizou o programa corretamente
          */
         $lex = $this->analiseLexica();
         foreach ($lex as $k => $linha) {
@@ -217,9 +217,6 @@ class Compilador {
                             break;
                     }
                 }
-                if ($el == "=" && key($lex[$k-1]) != 16) trigger_error("Um erro sintático foi encontrado: sinal de atribuição '=' sem variável", E_USER_ERROR);
-                if ($el == "escreva" && key($lex[$k-1]) != 13) trigger_error("Um erro sintático foi encontrado: escreva deve conter uma string", E_USER_ERROR);
-                if ($el == "leia" && key($lex[$k-1]) != 16) trigger_error("Um erro sintático foi encontrado: leia deve conter uma variável", E_USER_ERROR);
             }
         }
 
@@ -240,9 +237,9 @@ class Compilador {
         $lex = $this->analiseSintatica();
         foreach ($lex as $k => $linha) {
             foreach ($linha as $el) {
-                if ($el == "=" && key($lex[$k-1]) != 16) trigger_error("Um erro sintático foi encontrado: sinal de atribuição '=' sem variável", E_USER_ERROR);
-                if ($el == "escreva" && key($lex[$k-1]) != 13) trigger_error("Um erro sintático foi encontrado: escreva deve conter uma string", E_USER_ERROR);
-                if ($el == "leia" && key($lex[$k-1]) != 16) trigger_error("Um erro sintático foi encontrado: leia deve conter uma variável", E_USER_ERROR);
+                if ($el == "=" && key($lex[$k-1]) != 16) trigger_error("Um erro semântico foi encontrado: sinal de atribuição '=' sem variável", E_USER_ERROR);
+                if ($el == "escreva" && key($lex[$k-1]) != 13) trigger_error("Um erro semântico foi encontrado: escreva deve conter uma string", E_USER_ERROR);
+                if ($el == "leia" && key($lex[$k-1]) != 16) trigger_error("Um erro semântico foi encontrado: leia deve conter uma variável", E_USER_ERROR);
             }
         }
         return $lex;
@@ -280,7 +277,7 @@ class Compilador {
     // INICIA COMPILAÇÃO
     public function compilar()
     {
-        return $this->analiseSintatica();
+        return $this->analiseSemantica();
     }
     // FIM COMPILAÇÃO
 
