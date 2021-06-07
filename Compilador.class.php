@@ -189,6 +189,23 @@ class Compilador {
                 if ($k == 2 && $el != 'funcao') trigger_error("Um erro sintático foi encontrado: '{$el}' sugerimos 'funcao'", E_USER_ERROR);
                 if ($k == 3 && $el != 'inicio') trigger_error("Um erro sintático foi encontrado: '{$el}' sugerimos 'funcao'", E_USER_ERROR);
                 if ($k == 4 && $el != '{') trigger_error("Um erro sintático foi encontrado: '{$el}' sugerimos '{'", E_USER_ERROR);
+                if ($k == 5) {
+                    switch ($el) {
+                        case 'real':
+                        case 'inteiro':
+                        case 'caractere':
+                        case 'logico':
+                            if (key($lex[$k+1]) != 16) trigger_error("Um erro sintático foi encontrado: não colocou ao menos uma variável", E_USER_ERROR);
+                            break;
+                    }
+                }
+                if ($el == "=" && key($lex[$k-1]) != 16) trigger_error("Um erro sintático foi encontrado: sinal de atribuição '=' sem variável", E_USER_ERROR);
+                if ($el == "escreva" && key($lex[$k-1]) != 13) trigger_error("Um erro sintático foi encontrado: escreva deve conter uma string", E_USER_ERROR);
+
+                echo "<pre>";
+                print_r ("{$k} => {$el}");
+                echo "</pre>";
+
             }
         }
 
@@ -199,14 +216,12 @@ class Compilador {
     }
     // -- FIM ANÁLISE SINTÁTICA
 
-    // INICIA COMPILAÇÃO
-    public function compilar()
-    {
-        return $this->analiseSintatica();
-    }
-    // FIM COMPILAÇÃO
-
     // RETORNA APENAS A ARRAY DE TOKENS PRONTA
+    /*
+     Essa parte poderia estar dentro da ANÁLISE LÉXICA pois esse é a tabela de tokens pronta
+     optamos em separar para facilitar a exibição da tabela no arquivo index, assim conseguimos pegar só a tabela
+     e trabalhar apenas no visual pra ficar mais legal de ver
+    */
     public function tokensArr()
     {
         $serial = $this->compilar();
@@ -229,9 +244,18 @@ class Compilador {
     }
     // FIM RETORNA APENAS A ARRAY DE TOKENS PRONTA
 
+    // INICIA COMPILAÇÃO
+    public function compilar()
+    {
+        return $this->analiseSintatica();
+    }
+    // FIM COMPILAÇÃO
+
 }
 
-// nossa função para gerar os erros ao dev
+/*
+ função genérica para gerar os erros ao dev/usuário
+*/
 function funcaoMostraErros($errno, $errstr, $errfile, $errline) {
     if (!(error_reporting() & $errno)) return false;
 
