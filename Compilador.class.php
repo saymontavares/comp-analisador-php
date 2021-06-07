@@ -184,11 +184,17 @@ class Compilador {
         $lex = $this->analiseLexica();
         foreach ($lex as $k => $linha) {
             foreach ($linha as $el) {
-                if ($k == 0) {
-                    if ($el != 'programa') trigger_error("Um erro sintático foi encontrado: '{$el}' deve começar com 'programa'", E_USER_ERROR);
-                }
+                if ($k == 0 && $el != 'programa') trigger_error("Um erro sintático foi encontrado: '{$el}' deve começar com 'programa'", E_USER_ERROR);
+                if ($k == 1 && $el != '{') trigger_error("Um erro sintático foi encontrado: '{$el}' deve começar com 'programa'", E_USER_ERROR);
+                if ($k == 2 && $el != 'funcao') trigger_error("Um erro sintático foi encontrado: '{$el}' sugerimos 'funcao'", E_USER_ERROR);
+                if ($k == 3 && $el != 'inicio') trigger_error("Um erro sintático foi encontrado: '{$el}' sugerimos 'funcao'", E_USER_ERROR);
+                if ($k == 4 && $el != '{') trigger_error("Um erro sintático foi encontrado: '{$el}' sugerimos '{'", E_USER_ERROR);
             }
         }
+
+        if (!isset($lex[count($lex)-1][14]) || $lex[count($lex)-1][14] != '}') trigger_error("Um erro sintático foi encontrado, a função deve terminar com '}'", E_USER_ERROR);
+        if (!isset($lex[count($lex)-2][14]) || $lex[count($lex)-2][14] != '}') trigger_error("Um erro sintático foi encontrado, o programa deve terminar com '}'", E_USER_ERROR);
+
         return $lex;
     }
     // -- FIM ANÁLISE SINTÁTICA
@@ -234,7 +240,7 @@ function funcaoMostraErros($errno, $errstr, $errfile, $errline) {
     switch ($errno) {
     case E_USER_ERROR:
         echo "<p style='font-size:1.3em'><b>Erro gerado:</b> $errstr<br />\n";
-        echo "  Encontramos problemas na linha $errline arquivo $errfile<br />";
+        echo "  Encontramos problemas na linha <b>{$errline}</b> arquivo <b>{$errfile}</b><br />";
         echo "<small>PHP " . PHP_VERSION . "</small><br /></p>\n";
         exit(1);
         break;

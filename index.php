@@ -40,6 +40,7 @@ $code = 'programa
                 escreva("\nA subtração dos números é igual a: ", sub)
                 escreva("\nA multiplicação dos números é igual a: ", mult)
                 escreva("\nA divisão dos números é igual a: ", div)
+            }
 
         }';
 
