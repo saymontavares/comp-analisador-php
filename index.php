@@ -43,25 +43,25 @@ $code = 'programa
 
         }';
 
-$code = 'programa
-        {
-            funcao inicio()
-            {
-                real resultado
+// $code = 'programa
+//         {
+//             funcao inicio()
+//             {
+//                 real resultado
 
-                resultado = 5.0 + 4.0 * 2.0 + 2
-                escreva("Operação: 5 + 4 * 2 + 2 = ", resultado)
+//                 resultado = 5.0 + 4.0 * 2.0 + 2
+//                 escreva("Operação: 5 + 4 * 2 + 2 = ", resultado)
 
-                resultado = 5.0 + 4.0 * 2.0
-                escreva("\nOperação: (5 + 4) * 2 = ", resultado)
+//                 resultado = 5.0 + 4.0 * 2.0
+//                 escreva("\nOperação: (5 + 4) * 2 = ", resultado)
 
-                resultado = 1.0 + 2.0 / 3.0 * 4.0
-                escreva("\nOperação: 1 + 2 / 3 * 4 = ", resultado)
+//                 resultado = 1.0 + 2.0 / 3.0 * 4.0
+//                 escreva("\nOperação: 1 + 2 / 3 * 4 = ", resultado)
 
-                resultado = 1.0 + 2.0 / 3.0 * 4.0
-                escreva("\nOperação: (1 + 2) / (3 * 4) = ", resultado)
-            }
-        }';
+//                 resultado = 1.0 + 2.0 / 3.0 * 4.0
+//                 escreva("\nOperação: (1 + 2) / (3 * 4) = ", resultado)
+//             }
+//         }';
 $compilador = new Compilador($code);
 $tokens = $compilador->tokensArr();
 ?>
@@ -85,31 +85,5 @@ $tokens = $compilador->tokensArr();
     <?php endforeach ?>
 </table>
 
-<style>
-    table {
-        font-family: arial, sans-serif;
-        border-collapse: collapse;
-        width: 45%;
-        float:right;
-        margin:10px;
-    }
 
-    td, th {
-        border: 1px solid #dddddd;
-        text-align: left;
-        padding: 8px;
-    }
-
-    tr:nth-child(even) {
-        background-color: #dddddd;
-    }
-
-    pre {
-        width: 45%;
-        float:left;
-        background-color:
-        black;color:#FFF;
-        margin:10px;
-        padding: 10px;
-    }
-</style>
+<link rel="stylesheet" href="style.css">

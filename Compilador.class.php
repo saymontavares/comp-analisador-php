@@ -8,8 +8,8 @@ class Compilador {
 
     private $code;
     private $tokens;
-    private $tableSerial = [];
-    private $reservedWords = [
+    private $tabelaTokens = [];
+    private $palavrasReservadas = [
         1   => 'programa',
         2   => '{',
         3   => 'funcao',
@@ -32,60 +32,80 @@ class Compilador {
         // 20  => Number
     ];
 
+    // função construtora, recebe apenas um parametro obrigatório o código fonte
     public function __construct($code)
     {
         $this->code = $code;
+        set_error_handler("funcaoMostraErros");
     }
 
-
-    public function createTokens()
+    // -- ANÁLISE LÉXICA
+    // Cria os tokens
+    public function scannerLinhasCodigo()
     {
-        $this->tokens = str_replace(['  ', "\t"], '', $this->code);
-        $this->tokens = explode("\n", $this->tokens);
-        foreach ($this->tokens as $k => $v) $this->tokens[$k] = trim($v);
-        $this->tokens = array_filter($this->tokens);
+        $this->tokens = str_replace(['  ', "\t"], '', $this->code); // remove os espaços em excesso e as tabulações (Tab)
+        $this->tokens = explode("\n", $this->tokens); // cria uma posição na array para cada linha do código
+        foreach ($this->tokens as $k => $v) $this->tokens[$k] = trim($v); // percorre cada linha e remove os espaços do começo e fim com trim
+        $this->tokens = array_filter($this->tokens); // garatimos que não vai ter posição em branco no array de tokens removendo as mesmas
         return $this->tokens;
     }
+    // Fim criação tokens
 
-    public function createTableSerial()
+    // função que gera a tabela de tokens juntamente com a análise léxica
+    public function analiseLexica()
     {
-        $tokens = $this->createTokens();
-        foreach ($tokens as $k => $v) {
-            if (strpos($v, '"') && strripos($v, '"')) {
-                if (strripos($v, '"') <= strpos($v, '"') || substr_count($v, '"') % 2 != 0) {
+        $tokens = $this->scannerLinhasCodigo(); // pega o codigo limpo
+        foreach ($tokens as $k => $v) { // percorre todas as linhas
+            if (strpos($v, '"') && strripos($v, '"')) { // verifica se existe string "" na linha
+                if (strripos($v, '"') <= strpos($v, '"') || substr_count($v, '"') % 2 != 0) { // verificar se abriru e fechou as aspas da string se não gera um erro
                     trigger_error("Erro na string (\")", E_USER_ERROR);
                 } elseif (strripos($v, '"') > strpos($v, '"')) {
-                    array_push($this->tableSerial, [
+                    // se a string estiver correta classificamos tudo que tiver dentro de aspas "" como string
+                    // 13 é o código referencia da tabela de palavras reservadas ($palavrasReservadas) para strings
+                    // fazemos o push para dentro da array de tokens como 13 => String
+                    array_push($this->tabelaTokens, [
                         13 => substr($v, (strpos($v, '"')+1), (strripos($v, '"')-9))
                     ]);
-                    $tokens[$k] = substr_replace($v, '', strpos($v, '"'), strripos($v, '"')-7);
-                    $tokens[$k] = substr_replace($v, '', strpos($v, '('), strripos($v, ')'));
-                    $search = array_search($tokens[$k], $this->reservedWords);
+                    $tokens[$k] = substr_replace($v, '', strpos($v, '"'), strripos($v, '"')-7); // removemos as aspas que sobraram da string
+                    $tokens[$k] = substr_replace($v, '', strpos($v, '('), strripos($v, ')')); // removemos os parênteses que sobraram da linha
+
+                    // pegamos as palavras que sobraram e buscamos na array de palavras reservadas
+                    // se encontrou faz o push para a array de tokens se não um erro léxico é gerado
+                    $search = array_search($tokens[$k], $this->palavrasReservadas);
                     if ($search !== false) {
-                        array_push($this->tableSerial, [
+                        array_push($this->tabelaTokens, [
                             $search => $tokens[$k]
                         ]);
                     } else {
-                        trigger_error("Erro na string: {$tokens[$k]}", E_USER_ERROR);
+                        trigger_error("Token não existe: {$tokens[$k]}", E_USER_ERROR);
                     }
                 }
             } else {
+                // aqui verficamos as linhas que não possuem string
+
+                // na variavel $exp quebramos as linhas em palavras formando um array de palavras
+                // desse modo percorremos palavra por palavra e comparamos com nossa array de palavras reservadas
                 $exp = explode(' ', $v);
                 foreach ($exp as $k => $v) {
-                    $search = array_search($v, $this->reservedWords);
+                    $search = array_search($v, $this->palavrasReservadas);
+
+                    // se encontrou a palavra coloca em nossa array de tokens e remove a palavra da array $exp
                     if ($search !== false) {
-                        array_push($this->tableSerial, [
+                        array_push($this->tabelaTokens, [
                             $search => $v
                         ]);
                         unset($exp[$k]);
                     } else {
+                        // aqui verificamos as palavras dentro dos parênteses
+                        // se são palavras reservadas ou variáveis
+                        // também verificamos se não possui nenhum caracteres especial nos nomes de variaveis ou palavras reservadas pois não pode, isso vai gerar um erro léxico
                         if (strpos($v, '(') !== false && strripos($v, ')') !== false && strpos($v, '(') < strripos($v, ')')) {
                             $strF = substr($v, strpos($v, '('), strripos($v, ')'));
                             if (strpos($v, '(')+1 == strripos($v, ')')) {
                                 $exp[$k] = substr_replace($v, '', strpos($v, '('), strripos($v, ')'));
-                                $search = array_search($exp[$k], $this->reservedWords);
+                                $search = array_search($exp[$k], $this->palavrasReservadas);
                                 if ($search !== false) {
-                                    array_push($this->tableSerial, [
+                                    array_push($this->tabelaTokens, [
                                         $search => $exp[$k]
                                     ]);
                                     unset($exp[$k]);
@@ -93,14 +113,16 @@ class Compilador {
                             } else {
                                 $var = substr($v, strpos($v, '(')+1, strripos($v, ')')-5);
                                 $exp[$k] = substr_replace($v, '', strpos($v, '('), strripos($v, ')'));
+                                // verifica se o nome da variável é válida e não possui nenhum caracter não permitido para esse tipo
+                                // classifica como 16 => Var da nossa tabela de tokens
                                 if (isset($exp[$k]) && !preg_match('/[\'^£$%&*()}{@#~?><>,|=+¬-]/', $var)) {
-                                    array_push($this->tableSerial, [
+                                    array_push($this->tabelaTokens, [
                                         16 => $var
                                     ]);
                                 }
-                                $search = array_search($exp[$k], $this->reservedWords);
+                                $search = array_search($exp[$k], $this->palavrasReservadas);
                                 if ($search !== false) {
-                                    array_push($this->tableSerial, [
+                                    array_push($this->tabelaTokens, [
                                         $search => $exp[$k]
                                     ]);
                                     unset($exp[$k]);
@@ -109,14 +131,15 @@ class Compilador {
                                 }
                             }
                         } else {
+                            // verificar o valor da variavel se for numerico classifica como 20 => Number
                             $exp[$k] = str_replace(',', '', $exp[$k]);
                             if (!preg_match('/[\'^£$%&*()}{@#~?><>,|=+¬-]/', $exp[$k])) {
                                 if (is_numeric($exp[$k])) {
-                                    array_push($this->tableSerial, [
+                                    array_push($this->tabelaTokens, [
                                         20 => $exp[$k]
                                     ]);
                                 } else {
-                                    array_push($this->tableSerial, [
+                                    array_push($this->tabelaTokens, [
                                         16 => $exp[$k]
                                     ]);
                                 }
@@ -128,16 +151,17 @@ class Compilador {
                     }
                 }
 
+                // aqui fazemos uma última verificação caso ainda sobre alguma palavra/variável para ser analisada
                 foreach ($exp as $k => $v) {
                     $exp[$k] = str_replace(',', '', $exp[$k]);
                     if (is_numeric($exp[$k])) {
-                        array_push($this->tableSerial, [
+                        array_push($this->tabelaTokens, [
                             20 => $exp[$k]
                         ]);
                         unset($exp[$k]);
                     }
                     if (isset($exp[$k]) && !preg_match('/[\'^£$%&*()}{@#~?><>,|=+¬-]/', $v)) {
-                        array_push($this->tableSerial, [
+                        array_push($this->tabelaTokens, [
                             16 => $exp[$k]
                         ]);
                         unset($exp[$k]);
@@ -150,18 +174,22 @@ class Compilador {
             }
         }
 
-        return $this->tableSerial;
+        return $this->tabelaTokens;
     }
+    // -- FIM ANÁLISE LÉXICA
 
+    // INICIA COMPILAÇÃO
     public function compilar()
     {
-        return $this->createTableSerial();
+        return $this->analiseLexica();
     }
+    // FIM COMPILAÇÃO
 
+    // RETORNA APENAS A ARRAY DE TOKENS PRONTA
     public function tokensArr()
     {
-        $serial = $this->createTableSerial();
-        $reserv = $this->reservedWords;
+        $serial = $this->compilar();
+        $reserv = $this->palavrasReservadas;
         $reserv[13] = 'String';
         $reserv[16] = 'Var';
         $reserv[20] = 'Number';
@@ -178,5 +206,24 @@ class Compilador {
 
         return $tableTokens;
     }
+    // FIM RETORNA APENAS A ARRAY DE TOKENS PRONTA
 
+}
+
+// nossa função para gerar os erros ao dev
+function funcaoMostraErros($errno, $errstr, $errfile, $errline) {
+    if (!(error_reporting() & $errno)) return false;
+
+    $errstr = htmlspecialchars($errstr);
+
+    switch ($errno) {
+    case E_USER_ERROR:
+        echo "<p style='font-size:1.3em'><b>Erro gerado:</b> $errstr<br />\n";
+        echo "  Encontramos problemas na linha $errline arquivo $errfile<br />";
+        echo "<small>PHP " . PHP_VERSION . "</small><br /></p>\n";
+        exit(1);
+        break;
+    }
+
+    return true;
 }
